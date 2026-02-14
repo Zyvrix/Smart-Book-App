@@ -115,8 +115,8 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 #### Supabase URL Configuration
 
 1. In Supabase → Authentication → URL Configuration:
-Site URL → https://your-app.vercel.app
-3.Add your Vercel domain inside Redirect URLs
+2. Site URL → https://your-app.vercel.app
+3. Add your Vercel domain inside Redirect URLs
 4. Save
 
 ## Problems Encountered and Solutions
