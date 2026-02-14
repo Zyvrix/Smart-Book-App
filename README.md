@@ -260,31 +260,25 @@ smart-bookmark-app/
 │   ├── api/
 │   │   └── auth/
 │   │       └── callback/
-│   │           └── route.ts       # OAuth callback handler
-│   ├── globals.css                # Global styles
-│   ├── layout.tsx                 # Root layout
-│   └── page.tsx                   # Main page with bookmark UI
+│   │           └── route.ts      
+│   ├── globals.css                
+│   ├── layout.tsx                 
+│   └── page.tsx                   
+├── components/
+|   └──bookmarkUI.tsx
 ├── lib/
-│   └── supabase.ts                # Supabase client configuration
-├── .env.local.example             # Environment variables template
-├── .gitignore                     # Git ignore file
-├── next.config.js                 # Next.js configuration
-├── package.json                   # Dependencies
-├── postcss.config.js              # PostCSS configuration
-├── README.md                      # This file
-├── tailwind.config.js             # Tailwind CSS configuration
-└── tsconfig.json                  # TypeScript configuration
+│   └── supabase.ts                
+├── .env.local.example             
+├── .gitignore    
+├── eslint.config.mjs                 
+├── next.config.js                 
+├── package.json                   
+├── postcss.config.js              
+├── README.md                      
+├── tailwind.config.js             
+└── tsconfig.json                  
 ```
 
-## Future Enhancements
-
-- Add bookmark folders/categories
-- Implement search and filtering
-- Add bookmark tags
-- Export/import bookmarks
-- Share bookmarks with other users
-- Browser extension for quick bookmarking
-- Bookmark descriptions and notes
 
 ## License
 
