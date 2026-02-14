@@ -107,10 +107,16 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 #### Update Google OAuth Redirect URIs
 
-1. Go back to Google Cloud Console → Credentials
-2. Edit your OAuth 2.0 Client ID
-3. Add your Vercel URL to Authorized redirect URIs:
-   - `https://your-app.vercel.app/api/auth/callback`
+1. Go to Google Cloud Console → APIs & Services → Credentials
+2. Open your OAuth 2.0 Client ID
+3. In Authorized redirect URIs, add: https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback
+4. Save
+
+#### Supabase URL Configuration
+
+1. In Supabase → Authentication → URL Configuration:
+Site URL → https://your-app.vercel.app
+3.Add your Vercel domain inside Redirect URLs
 4. Save
 
 ## Problems Encountered and Solutions
@@ -157,6 +163,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ### Authentication Flow
 
+(User → Google → Supabase → Your App)
 1. User clicks "Sign in with Google"
 2. Supabase redirects to Google OAuth consent screen
 3. User authorizes the application

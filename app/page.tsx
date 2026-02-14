@@ -184,7 +184,7 @@ if (!user) {
       <div className="relative z-10 bg-white/60 backdrop-blur-xl border border-[#e0d6c6] shadow-xl rounded-3xl p-12 max-w-lg w-full text-center">
 
         <h1 className="text-4xl font-semibold tracking-tight text-[#3e3a34] mb-4">
-          Smart <span className="text-[#8b6f47]">Bookmarks</span>
+          Smart <span className="text-[#8b6f47]">Bookmarks App</span>
         </h1>
 
         <p className="text-[#6e665c] mb-8 leading-relaxed">
