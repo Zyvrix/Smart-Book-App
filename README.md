@@ -6,7 +6,7 @@ A real-time bookmark manager built with Next.js, Supabase, and Google OAuth. Thi
 
 - Google OAuth authentication (no email/password)
 - Add bookmarks with URL and title
-- Private bookmarks (each user sees only their own)
+- Private bookmarks 
 - Real-time updates across tabs without page refresh
 - Delete bookmarks
 - Deployed on Vercel with live URL
@@ -15,14 +15,14 @@ A real-time bookmark manager built with Next.js, Supabase, and Google OAuth. Thi
 
 - **Framework**: Next.js 14 (App Router)
 - **Authentication**: Supabase Auth (Google OAuth)
-- **Database**: Supabase (PostgreSQL)
+- **Database**: Supabase
 - **Real-time**: Supabase Realtime
 - **Styling**: Tailwind CSS
 - **Deployment**: Vercel
 
 ## Live Demo
 
-[Live URL will be here after deployment]
+
 
 ## Setup Instructions
 
@@ -48,44 +48,7 @@ npm install
 
 #### Create the Bookmarks Table
 
-In the Supabase SQL Editor, run this SQL:
-
-```sql
--- Create bookmarks table
-create table bookmarks (
-  id uuid default gen_random_uuid() primary key,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  url text not null,
-  title text not null,
-  user_id uuid references auth.users(id) on delete cascade not null
-);
-
--- Enable Row Level Security
-alter table bookmarks enable row level security;
-
--- Create policy: Users can only see their own bookmarks
-create policy "Users can view own bookmarks"
-  on bookmarks for select
-  using (auth.uid() = user_id);
-
--- Create policy: Users can insert their own bookmarks
-create policy "Users can insert own bookmarks"
-  on bookmarks for insert
-  with check (auth.uid() = user_id);
-
--- Create policy: Users can delete their own bookmarks
-create policy "Users can delete own bookmarks"
-  on bookmarks for delete
-  using (auth.uid() = user_id);
-
--- Create policy: Users can update their own bookmarks
-create policy "Users can update own bookmarks"
-  on bookmarks for update
-  using (auth.uid() = user_id);
-
--- Enable realtime
-alter publication supabase_realtime add table bookmarks;
-```
+In the Supabase SQL Editor, run this setup.sql file.
 
 #### Configure Google OAuth in Supabase
 
@@ -99,10 +62,7 @@ alter publication supabase_realtime add table bookmarks;
 2. Create a new project or select an existing one
 3. Enable the **Google+ API**
 4. Go to **Credentials** → **Create Credentials** → **OAuth client ID**
-5. Configure the OAuth consent screen:
-   - User Type: External
-   - Add your app name, user support email, and developer contact
-   - Add scopes: `email`, `profile`, `openid`
+5. Configure the OAuth consent screen (User type:External)
 6. Create OAuth 2.0 Client ID:
    - Application type: Web application
    - Authorized redirect URIs: Add the callback URL from Supabase (from step 2.2 above)
@@ -157,12 +117,13 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ### Problem 1: Google OAuth Redirect Loop
 
-**Issue**: After Google authentication, users were stuck in a redirect loop.
+**Issue**: After signing in with Google, the app redirected back to the login page instead of staying authenticated..
 
 **Solution**: 
-- Implemented a proper OAuth callback route handler at `/api/auth/callback/route.ts`
-- Used `createRouteHandlerClient` from Supabase Auth Helpers to properly exchange the authorization code for a session
-- Ensured the redirect URL in Google Console matched exactly with the callback URL configured in Supabase
+- Implemented /api/auth/callback route.
+- Used createServerClient from @supabase/ssr.
+- Called supabase.auth.exchangeCodeForSession(code) correctly.
+- Ensured redirect URL matched Supabase dashboard configuration
 
 ### Problem 2: Real-time Updates Not Working Across Tabs
 
@@ -174,42 +135,23 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 - Filtered the subscription by user_id to ensure users only receive updates for their own bookmarks
 - Properly cleaned up the subscription on component unmount
 
-### Problem 3: Row Level Security Blocking Bookmark Operations
+### Problem 3: When deleting a bookmark, it did not disappear instantly unless the page was refreshed.
 
-**Issue**: Users couldn't insert or view their bookmarks even after authentication.
-
-**Solution**:
-- Created proper RLS policies for all CRUD operations (SELECT, INSERT, UPDATE, DELETE)
-- Each policy checks that `auth.uid() = user_id` to ensure users can only access their own data
-- Enabled RLS on the bookmarks table with `alter table bookmarks enable row level security;`
-
-### Problem 4: TypeScript Type Errors with Supabase Client
-
-**Issue**: TypeScript errors when using Supabase client in client components.
+**Issue**: The realtime payload for DELETE events requires payload.old, and UI was relying only on database response.
 
 **Solution**:
-- Used `createClientComponentClient` from `@supabase/auth-helpers-nextjs` for client components
-- Used `createRouteHandlerClient` for API route handlers
-- Properly typed the Bookmark interface to match the database schema
+- Added optimistic UI update (remove from state immediately).
+- Added proper handling for payload.old in realtime subscription.
+- Added rollback logic in case delete fails.
 
-### Problem 5: Environment Variables Not Loading in Production
+### Problem 4: Supabase Realtime Subscription Issues
 
-**Issue**: App crashed on Vercel due to missing environment variables.
-
-**Solution**:
-- Added all required environment variables in Vercel project settings
-- Used `NEXT_PUBLIC_` prefix for client-side environment variables
-- Created `.env.local.example` to document required variables
-- Added `.env.local` to `.gitignore` to prevent committing secrets
-
-### Problem 6: Auth State Persistence Issues
-
-**Issue**: Users were logged out on page refresh.
+**Issue**: Realtime was not triggering for specific user bookmarks.
 
 **Solution**:
-- Used `onAuthStateChange` listener to properly track auth state changes
-- Implemented `checkUser()` function on component mount to restore session
-- Stored user state in React state with proper initialization
+- Added filter inside subscription:
+  filter: `user_id=eq.${user.id}`
+-This ensured only the logged-in user's data was tracked.
 
 ## How It Works
 
@@ -241,16 +183,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
   - Delete their own bookmarks
 - Server-side enforcement prevents any data leakage
 
-## Testing
 
-To test the real-time functionality:
-
-1. Open the app in two different browser tabs
-2. Sign in with your Google account
-3. Add a bookmark in one tab
-4. Watch it appear immediately in the other tab without refresh
-5. Delete a bookmark in one tab
-6. See it disappear from the other tab instantly
 
 ## Project Structure
 
@@ -274,7 +207,8 @@ smart-bookmark-app/
 ├── next.config.js                 
 ├── package.json                   
 ├── postcss.config.js              
-├── README.md                      
+├── README.md      
+├── setup.sql                
 ├── tailwind.config.js             
 └── tsconfig.json                  
 ```
