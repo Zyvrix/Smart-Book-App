@@ -1,7 +1,7 @@
 # Smart Bookmark App
 
 A real-time bookmark manager built with Next.js, Supabase, and Google OAuth. This application allows users to save, organize, and manage their bookmarks with real-time synchronization across multiple tabs and devices.
-
+Live: https://smartbookapp-blush.vercel.app/
 ## Features
 
 - Google OAuth authentication (no email/password)
